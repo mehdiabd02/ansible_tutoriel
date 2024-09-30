@@ -1,3 +1,9 @@
+[web_servers]
 srv1@192.168.1.37
+
+
+[file_servers]
 srv2@192.168.1.38
+[db_servers]
 kali@192.168.1.100
+srv1@192.168.1.37

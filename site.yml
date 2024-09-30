@@ -1,0 +1,75 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Update the package cache (Kali)
+      tags: always 
+      apt:
+        update_cache: yes
+      when: ansible_distribution == "Kali"
+
+    - name: Upgrade packages (Kali)
+      tags: always
+      apt:
+        upgrade: dist
+      when: ansible_distribution == "Kali"
+
+    - name: Update the package cache (Ubuntu)
+      tags: always
+      apt:
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Upgrade packages (Ubuntu)
+      tags: always
+      apt:
+        upgrade: dist
+      when: ansible_distribution == "Ubuntu"
+
+- hosts: web_servers
+  become: true
+  tasks:
+    - name: Install Apache and PHP for Ubuntu
+      tags: apache,apache2,ubuntu  
+      apt:
+        name: 
+          - apache2
+          - libapache2-mod-php
+        state: latest 
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install Apache and PHP for Kali
+      tags: apache,apache2,kali  
+      apt:
+        name: 
+          - apache2
+          - libapache2-mod-php
+        state: latest
+      when: ansible_distribution == "Kali"
+
+- hosts: db_servers
+  become: true
+  tasks:
+    - name: Install MariaDB package (Kali)
+      tags: kali,db,mariadb
+      apt:
+        name: mariadb-server
+        state: latest
+      when: ansible_distribution == "Kali"
+
+    - name: Install MariaDB package (Ubuntu)
+      tags: db,mariadb,ubuntu
+      apt:
+        name: mariadb-server
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+- hosts: file_servers
+  become: true
+  tasks:
+
+    - name: Install samba package
+      tags: samba
+      package: 
+        name: samba
+        state: latest 
