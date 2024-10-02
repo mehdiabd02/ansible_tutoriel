@@ -1,0 +1,53 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Update the package cache (Kali)
+      tags: always
+      apt:
+        update_cache: yes
+      when: ansible_distribution == "Kali"
+
+    - name: Upgrade packages (Kali)
+      tags: always
+      apt:
+        upgrade: dist
+      when: ansible_distribution == "Kali"
+
+    - name: Update the package cache (Ubuntu)
+      tags: always
+      apt:
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Upgrade packages (Ubuntu)
+      tags: always
+      apt:
+        upgrade: dist
+      when: ansible_distribution == "Ubuntu"
+
+- hosts: all
+  become: true
+  tasks:
+    - name: Create simone user
+      tags: always
+      user:
+        name: simone
+        groups: root
+        state: present  # Ajouté pour garantir que l'utilisateur est créé
+
+    - name: add ssh key for simone
+      tags: always
+      authorized_key:
+        user: simone
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBO8I2C3Rnaj+vINjZB1D3mZbsGUd3SXkqu4IOvc3sFB ansible keys"
+  
+    - name: add sudoers file for simone
+      tags: always
+      copy:
+        src: sudoer_simone 
+        dest: /etc/sudoers.d/simone
+        owner: root
+        group: root
+        mode: 0440        
+    
