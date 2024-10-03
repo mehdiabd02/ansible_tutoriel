@@ -1,0 +1,50 @@
+- name: Install Apache and PHP for Ubuntu
+  tags: apache, apache2, ubuntu  
+  apt:
+    name: 
+      - apache2
+      - libapache2-mod-php
+    state: latest 
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install Apache and PHP for Kali
+  tags: apache, apache2, kali  
+  apt:
+    name: 
+      - apache2
+      - libapache2-mod-php
+    state: latest
+  when: ansible_distribution == "Kali"
+
+- name: Start Apache2 (Kali)
+  tags: apache, kali, php
+  service:
+    name: apache2
+    state: started
+    enabled: yes
+  when: ansible_distribution == "Kali"
+
+- name: Change e-mail for admin
+  tags: apache2, kali
+  lineinfile:
+    path: /etc/apache2/sites-available/000-default.conf
+    regexp: '^ServerAdmin'
+    line: ServerAdmin somebody@somewhere.net
+  when: ansible_distribution == "Kali"
+  register: apache2
+
+- name: Restart Apache2 (Kali)
+  tags: apache2, kali
+  service: 
+    name: apache2
+    state: restarted
+  when: apache2.changed        
+
+- name: Copy default HTML file for site
+  tags: apache, apache2, php
+  copy:
+    src: default_site.html
+    dest: /var/www/html/index.html
+    owner: root
+    group: root
+    mode: '0644'

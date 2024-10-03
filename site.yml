@@ -1,7 +1,7 @@
 ---
 - hosts: all
   become: true
-  tasks:
+  pre_tasks:  # Correction de "pre-tasks" en "pre_tasks"
     - name: Update the package cache (Kali)
       tags: always
       apt:
@@ -16,112 +16,27 @@
       changed_when: false
       when: ansible_distribution == "Ubuntu"
 
-
 - hosts: all
   become: true
-  tasks:
+  roles: 
+    - base
 
-    - name: add ssh key for simone
-      tags: always
-      authorized_key:
-        user: simone
-        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBO8I2C3Rnaj+vINjZB1D3mZbsGUd3SXkqu4IOvc3sFB ansible keys"
-  
-    
 - hosts: workstations
   become: true
-  tasks:
-    - name: Install unzip
-      package:
-        name: unzip
-        state: present
-
-    - name: Install Terraform
-      unarchive: 
-        src: https://releases.hashicorp.com/terraform/0.12.28/terraform_0.12.28_linux_amd64.zip
-        dest: /usr/local/bin
-        remote_src: yes
-        mode: '0755'
-        owner: root
-        group: root
+  roles:
+    - workstations
 
 - hosts: web_servers
   become: true
-  tasks:
-    - name: Install Apache and PHP for Ubuntu
-      tags: apache, apache2, ubuntu  
-      apt:
-        name: 
-          - apache2
-          - libapache2-mod-php
-        state: latest 
-      when: ansible_distribution == "Ubuntu"
-
-    - name: Install Apache and PHP for Kali
-      tags: apache, apache2, kali  
-      apt:
-        name: 
-          - apache2
-          - libapache2-mod-php
-        state: latest
-      when: ansible_distribution == "Kali"
-
-    - name: Start Apache2 (Kali)
-      tags: apache, kali, php
-      service:
-        name: apache2
-        state: started
-        enabled: yes
-      when: ansible_distribution == "Kali"
-
-    - name: change e-mail for admin
-      tags: apache2,kali
-      lineinfile:
-        path:  /etc/apache2/sites-available/000-default.conf
-        regexp: '^ServerAdmin'
-        line: ServerAdmin somebody@somewhere.net
-      when: ansible_distribution == "Kali"
-      register: apache2
-
-    - name: restart apache2 (Kali)
-      tags: apache2,kali
-      service: 
-        name: apache2
-        state: restarted
-      when: apache2.changed        
-
-
-    - name: Copy default HTML file for site
-      tags: apache, apache2, php
-      copy:
-        src: default_site.html
-        dest: /var/www/html/index.html
-        owner: root
-        group: root
-        mode: '0644'
+  roles:
+    - web_servers
 
 - hosts: db_servers
   become: true
-  tasks:
-    - name: Install MariaDB package (Kali)
-      tags: kali, db, mariadb
-      apt:
-        name: mariadb-server
-        state: latest
-      when: ansible_distribution == "Kali"
-
-    - name: Install MariaDB package (Ubuntu)
-      tags: db, mariadb, ubuntu
-      apt:
-        name: mariadb-server
-        state: latest
-      when: ansible_distribution == "Ubuntu"
+  roles: 
+    - db_servers
 
 - hosts: file_servers
   become: true
-  tasks:
-    - name: Install Samba package
-      tags: samba
-      package: 
-        name: samba
-        state: latest
+  roles:
+    - file_servers
